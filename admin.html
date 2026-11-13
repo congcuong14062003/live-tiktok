@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI mỗi ngày • Điều khiển Quiz LIVE</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:#e9fbff;background:radial-gradient(circle at 10% 0%,#0d6693 0%,transparent 32%),linear-gradient(150deg,#062b62,#043e78 58%,#006a9d)}
+    .wrap{max-width:1190px;margin:auto;padding:28px 22px 50px}.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.brand{display:inline-block;border-radius:100px;background:#66efdb;color:#063b68;padding:9px 16px;font-size:14px;font-weight:950}.top h1{margin:0;font-size:clamp(26px,3vw,40px)}.sub{color:#c5e6f1;line-height:1.5}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:26px;margin-top:25px}.panel{border:1px solid #8ee4f04a;border-radius:22px;background:#042b59bb;box-shadow:0 20px 50px #001a3445;padding:22px;margin-bottom:17px}
+    h2{margin:0 0 17px;font-size:21px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{border-radius:15px;background:#ffffff12;padding:14px}.stat small{display:block;color:#b7dce9;font-size:12px}.stat strong{display:block;margin-top:5px;font-size:25px}
+    label{display:block;margin:15px 0 7px;font-weight:800;font-size:14px}select,input{width:100%;font:inherit;color:#fff;background:#073b6c;border:1px solid #83bdd1a8;border-radius:12px;padding:12px;outline:none}select:focus,input:focus{border-color:#68f6e3;box-shadow:0 0 0 3px #68f6e338}
+    .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.hint{font-size:13px;color:#bbdfeb;line-height:1.5;margin-top:13px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}button,.link-btn{border:0;border-radius:12px;padding:12px 17px;background:#14577e;color:white;font:inherit;font-weight:800;cursor:pointer;text-decoration:none}button:hover,.link-btn:hover{filter:brightness(1.1)}button.primary{background:#65efdc;color:#053961}.status{border-radius:12px;padding:12px 15px;background:#ffffff13;color:#dcfbff;margin-top:18px;min-height:46px}
+    .url{display:block;word-break:break-all;border-radius:12px;background:#ffffff10;padding:12px;color:#95ffeb;font-family:Consolas,monospace;font-size:13px}.preview{width:330px;aspect-ratio:9/16;border:2px solid #8ddfeb77;border-radius:18px;background:#082958;overflow:hidden}.preview iframe{border:0;width:100%;height:100%}.preview-title{font-size:14px;color:#b8e5ed;margin:0 0 10px;text-align:center}
+    .chat-grid{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:end}.chat-grid button{height:46px}.chat-status{margin-top:12px;border-radius:10px;background:#ffffff13;padding:10px 12px;font-size:13px;color:#d0f1f7}.chat-status.connected{color:#70f6cd}.chat-status.error{color:#ffbaba}.test-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}.score-row{display:grid;grid-template-columns:1fr 55px 55px;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff20}.score-row:first-child{color:#ffe394;font-weight:900}.score-row span:nth-child(n+2){text-align:right}.score-board{max-height:290px;overflow:auto}.right-now{font-size:22px;font-weight:900;color:#71f3d9}.muted{color:#aacbd9;font-size:13px}
+    @media(max-width:850px){.layout{grid-template-columns:1fr}.preview-col{justify-self:center}}@media(max-width:600px){.fields,.stats,.chat-grid,.test-grid{grid-template-columns:1fr}.wrap{padding:20px 14px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><span class="brand">AI MỖI NGÀY</span><h1>Điều khiển Quiz LIVE</h1></div>
+    <p class="sub">Quiz Việt → Anh với bốn lựa chọn A–D, nhận bình luận đúng và xếp hạng người chơi theo thời gian thực.</p>
+    <div class="layout">
+      <div>
+        <div class="panel">
+          <div class="stats"><div class="stat"><small>Ngân hàng từ</small><strong id="total">…</strong></div><div class="stat"><small>Câu đang phát</small><strong id="number">—</strong></div><div class="stat"><small>Trạng thái</small><strong id="running">Chưa chạy</strong></div></div>
+        </div>
+        <div class="panel">
+          <h2>Cấu hình buổi live</h2>
+          <label for="level">Cấp độ</label>
+          <select id="level"><option value="MIX">Trộn A1–C2 (C1/C2 hiếm)</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select>
+          <div class="fields">
+            <div><label for="think">Chọn đáp án (giây)</label><input id="think" type="number" min="3" max="60" value="10"></div>
+            <div><label for="reveal">Hiện đáp án (giây)</label><input id="reveal" type="number" min="1" max="15" value="3"></div>
+            <div><label for="breaktime">Tổng kết sau 15 câu</label><input id="breaktime" type="number" min="0" max="30" value="18"></div>
+          </div>
+          <p class="hint">Mỗi hiệp 15 câu. Trả lời đúng được 10 điểm, người đúng đầu tiên được 13 điểm. Popup top 3 hiện 15–30 giây; đặt 0 để bỏ qua.</p>
+          <div class="actions"><button class="primary" id="start">▶ Bắt đầu / Làm lại</button><button id="pause">Ⅱ Tạm dừng</button><button id="resume">▷ Tiếp tục</button><button id="next">→ Câu tiếp</button><button id="reset">↺ Dừng</button><button id="preview-voice">🔊 Thử phát âm tiếng Anh</button></div>
+          <div class="status" id="status" role="status">Đang kết nối server…</div>
+          <p class="hint" id="voice-status">Giọng phát âm tiếng Anh: đang chờ màn hình LIVE.</p>
+        </div>
+        <div class="panel">
+          <h2>Kết nối bình luận TikTok</h2>
+          <p class="hint">Bắt đầu phát LIVE trên TikTok trước, sau đó bấm kết nối. Khi hiện “Đã kết nối”, đáp án trong bình luận sẽ được chấm tự động.</p>
+          <div class="chat-grid"><div><label for="username">Tên kênh TikTok</label><input id="username" value="aimoingay.tips" autocomplete="off"></div><button class="primary" id="connect-chat">Kết nối</button><button id="disconnect-chat">Ngắt</button></div>
+          <div class="chat-status" id="chat-status">Chưa kết nối.</div><p class="muted" id="chat-count">Đã nhận 0 bình luận thật.</p><p class="muted" id="chat-lag">Độ trễ TikTok → app: chưa đo được.</p><p class="muted" id="last-comment">Chưa thấy bình luận nào từ TikTok.</p>
+          <p class="hint">Bộ đọc chat không chính thức dùng dịch vụ ký kết nối bên thứ ba. Không nhập mật khẩu hoặc cookie TikTok vào app.</p>
+        </div>
+        <div class="panel">
+          <h2>Thử chấm điểm trước khi LIVE</h2>
+          <div class="right-now">Đáp án hiện tại: <span id="current-answer">—</span></div>
+          <p class="muted">Chỉ nhận câu trả lời khi đồng hồ đang chạy. Bấm Bắt đầu rồi nhập A, B, C hoặc D để thử; chữ thường cũng được chấm.</p>
+          <div class="test-grid"><div><label for="test-name">Tên người xem</label><input id="test-name" value="Người xem thử"></div><div><label for="test-answer">Bình luận</label><input id="test-answer" placeholder="Ví dụ: A hoặc a" maxlength="10"></div><button id="test-comment">Gửi thử</button></div>
+        </div>
+        <div class="panel"><h2>Bảng xếp hạng</h2><div class="score-row muted"><span>Người chơi</span><span>Đúng</span><span>Điểm</span></div><div class="score-board" id="score-board"><p class="muted">Chưa có điểm.</p></div><div class="actions"><button id="clear-scores">Xóa điểm</button></div></div>
+        <div class="panel">
+          <h2>Đưa vào phần mềm livestream</h2>
+          <p class="hint">Thêm Browser Source, đặt chiều rộng <b>1080</b> và chiều cao <b>1920</b>, rồi dùng đường dẫn:</p>
+          <code class="url" id="live-url"></code>
+          <div class="actions"><button id="copy">Sao chép đường dẫn</button><a class="link-btn" href="/live.html" target="_blank" rel="noopener">Mở màn live</a></div>
+          <p class="hint">Có thể thêm <code>?volume=0.5</code> để giảm âm lượng hoặc <code>?mute=1</code> để tắt nhạc và hiệu ứng. Khung xem thử bên phải đã tắt tiếng để tránh phát âm thanh hai lần.</p>
+        </div>
+      </div>
+      <aside class="preview-col"><p class="preview-title">XEM THỬ MÀN LIVE · 9:16</p><div class="preview"><iframe src="/live.html?mute=1" title="Xem thử màn quiz live"></iframe></div></aside>
+    </div>
+  </main>
+  <script>
+    const $ = id => document.getElementById(id);
+    const url = `${location.origin}/live.html`;
+    $('live-url').textContent = url;
+    $('copy').onclick = async () => { try { await navigator.clipboard.writeText(url); $('status').textContent = 'Đã sao chép đường dẫn màn live.'; } catch { $('status').textContent = 'Không sao chép được; hãy chọn đường dẫn phía trên.'; } };
+    async function control(action) {
+      const body = {action};
+      if (action === 'start') Object.assign(body, {level:$('level').value,think:Number($('think').value),reveal:Number($('reveal').value),breaktime:Number($('breaktime').value)});
+      if (action === 'connect-chat') body.username=$('username').value;
+      if (action === 'test-comment') Object.assign(body,{name:$('test-name').value,content:$('test-answer').value});
+      try {
+        const response = await fetch('/control', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Có lỗi');
+        $('status').textContent = `Đã gửi lệnh: ${action}`;
+      } catch (error) { $('status').textContent = `Lỗi: ${error.message}`; }
+    }
+    for (const action of ['start','pause','resume','next','reset','preview-voice']) $(action).onclick = () => control(action);
+    $('connect-chat').onclick=()=>control('connect-chat');
+    $('disconnect-chat').onclick=()=>control('disconnect-chat');
+    $('test-comment').onclick=()=>control('test-comment');
+    $('clear-scores').onclick=()=>{if(confirm('Xóa toàn bộ bảng điểm?'))control('clear-scores')};
+    fetch('/bank-stats').then(response => response.json()).then(stats => $('total').textContent = stats.total.toLocaleString('vi-VN'));
+    const events = new EventSource('/events');
+    events.onmessage = event => {
+      const state = JSON.parse(event.data);
+      $('number').textContent = state.question ? state.questionNumber : '—';
+      $('running').textContent = state.status === 'running' ? 'Đang chạy' : state.status === 'paused' ? 'Tạm dừng' : 'Chưa chạy';
+      $('status').textContent = state.question ? `Hiệp ${state.match} · câu ${state.questionNumber}/15 • ${state.question.level} • ${state.phase === 'think' ? 'đang nhận đáp án' : state.phase === 'answer' ? 'đã khóa điểm' : 'tổng kết'} • còn ${Math.ceil(state.remaining)} giây` : 'Sẵn sàng. Chọn cấu hình rồi nhấn Bắt đầu.';
+      $('current-answer').textContent=state.question?`${state.question.correctOption} · ${state.question.word.toUpperCase()}`:'—';
+      $('voice-status').textContent=state.voice?.available?`Giọng phát âm tiếng Anh: ${state.voice.name}`:state.voice?.supported?'Chưa tìm thấy giọng tiếng Anh trong trình duyệt LIVE; hãy bấm Thử phát âm để nghe thực tế.':'Trình duyệt LIVE chưa báo hỗ trợ phát âm.';
+      $('chat-status').textContent=state.chat.message;
+      $('chat-status').className='chat-status '+state.chat.status;
+      $('chat-count').textContent=`Đã nhận ${state.chat.received || 0} bình luận thật`+(state.chat.lastCommentAt?` · gần nhất ${new Date(state.chat.lastCommentAt).toLocaleTimeString('vi-VN')}`:'');
+      $('chat-lag').textContent=state.chat.deliveryLagMs == null?'Độ trễ TikTok → app: chưa đo được.':`Độ trễ TikTok → app: khoảng ${(state.chat.deliveryLagMs / 1000).toFixed(1)} giây (bình luận gần nhất).`;
+      const last = state.chat.lastComment;
+      const result = { correct: 'đã cộng điểm', wrong: 'sai đáp án', duplicate: 'đã tính điểm trước đó', late: 'đến sau khi khóa điểm', paused: 'quiz đang tạm dừng', waiting: 'quiz chưa bắt đầu', chat: 'không phải A–D', invalid: 'thiếu thông tin người gửi hoặc nội dung' };
+      $('last-comment').textContent = last ? `Gần nhất: ${last.name}: “${last.content}” · ${result[last.status] || 'chưa chấm'}` : 'Chưa thấy bình luận nào từ TikTok.';
+      $('score-board').replaceChildren(...(state.leaderboard.length?state.leaderboard.map((entry,i)=>{const row=document.createElement('div');row.className='score-row';for(const value of [`${i+1}. ${entry.name}`,entry.correct,entry.points]){const cell=document.createElement('span');cell.textContent=value;row.append(cell)}return row}):[Object.assign(document.createElement('p'),{className:'muted',textContent:'Chưa có điểm.'})]));
+    };
+    events.onerror = () => $('status').textContent = 'Mất kết nối. Kiểm tra cửa sổ chạy server.';
+  </script>
+</body>
+</html>
