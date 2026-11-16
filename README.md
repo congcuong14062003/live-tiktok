@@ -14,6 +14,15 @@ Trang admin có bộ đếm **Đã nhận bình luận thật**. Sau khi kết n
 
 Ứng dụng dùng Node.js 24 đi kèm trong `runtime/node.exe`; không cần thay bản Node.js đang cài trên máy. Gói đọc chat đã được cài trong dự án.
 
+## LIVE bằng điện thoại và chia sẻ màn hình quiz
+
+1. Đóng cửa sổ `START_QUIZ.bat` nếu đang chạy, rồi mở `START_QUIZ_PHONE.bat` trên máy tính. Trang điều khiển vẫn là `http://127.0.0.1:8094/admin.html` trên máy tính.
+2. Cùng mạng Wi-Fi, mở trên điện thoại địa chỉ `ĐIỆN THOẠI` được in trong cửa sổ server, ví dụ `http://192.168.1.5:8094/live.html`. Nếu Windows Firewall hỏi, chỉ cho phép trên mạng **Riêng tư**. Có thể tắt dữ liệu di động khi thử để chắc chắn điện thoại dùng Wi-Fi.
+3. Trong TikTok trên điện thoại, chọn `+` → `LIVE` → `Trò chơi di động / Mobile gaming` nếu tài khoản có tùy chọn này, bắt đầu chia sẻ màn hình rồi chuyển sang trình duyệt đang mở quiz. Bấm `Bật âm thanh` trên màn hình quiz nếu nút xuất hiện. Dùng tài khoản khác xem LIVE thử để kiểm tra hình, tiếng và bình luận.
+4. Trên máy tính, mở trang điều khiển, kết nối `@aimoingay.tips`, rồi bấm `Bắt đầu`. Máy tính phải tiếp tục chạy server trong suốt buổi LIVE.
+
+Chế độ điện thoại chỉ mở màn hình quiz và tài nguyên đọc trên Wi-Fi; trang điều khiển, trạng thái và lệnh điều khiển chỉ nhận truy cập từ chính máy tính. Không chuyển tiếp cổng 8094 ra Internet. Nếu điện thoại không có tùy chọn chia sẻ màn hình, cách này không phát được màn hình quiz qua TikTok trên điện thoại.
+
 Khi lấy dự án từ Git trên máy khác, thư mục `runtime/` và `node_modules/` không được đưa vào repository. Hãy cài Node.js 24, chạy `npm install`, rồi đặt `node.exe` vào `runtime/node.exe` để dùng `START_QUIZ.bat`; hoặc chạy `node server.js` trực tiếp.
 
 ## Luật chơi

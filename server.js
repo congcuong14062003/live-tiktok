@@ -3,9 +3,10 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const source = require('./legacy_bank.js');
 
-const HOST = '127.0.0.1';
+const HOST = process.env.QUIZ_HOST === '0.0.0.0' ? '0.0.0.0' : '127.0.0.1';
 const PORT = Number(process.env.PORT || 8094);
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const clients = new Set();
@@ -338,8 +339,19 @@ const assets = new Map([
   ['/fonts/nunito-latin-ext-wght-normal.woff2', 'font/woff2'],
   ['/fonts/nunito-vietnamese-wght-normal.woff2', 'font/woff2'],
 ]);
+function isLoopback(address) {
+  return address === '127.0.0.1' || address === '::1' || address === '::ffff:127.0.0.1';
+}
+function lanAddresses() {
+  return [...new Set(Object.values(os.networkInterfaces()).flat()
+    .filter(item => item && item.family === 'IPv4' && !item.internal)
+    .map(item => item.address))];
+}
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
+  const localOnly = url.pathname === '/' || url.pathname === '/admin.html' ||
+    url.pathname === '/control' || url.pathname === '/state' || url.pathname === '/bank-stats';
+  if (localOnly && !isLoopback(req.socket.remoteAddress)) return sendJson(res, 403, { error: 'Trang điều khiển chỉ mở trên máy tính chạy quiz.' });
   if (url.pathname === '/events' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive' });
     res.write(`data: ${JSON.stringify(snapshot())}\n\n`); clients.add(res); req.on('close', () => clients.delete(res)); return;
@@ -377,9 +389,13 @@ if (require.main === module) {
   setInterval(() => { advance(); broadcast(); }, 200);
   server.on('error', error => { console.error(error.code === 'EADDRINUSE' ? `Cổng ${PORT} đang được sử dụng.` : error); process.exit(1); });
   server.listen(PORT, HOST, () => {
-    console.log(`QUIZ LIVE • http://${HOST}:${PORT}/admin.html`);
-    console.log(`MÀN HÌNH LIVE • http://${HOST}:${PORT}/live.html`);
+    console.log(`TRANG ĐIỀU KHIỂN • http://127.0.0.1:${PORT}/admin.html`);
+    console.log(`MÀN HÌNH LIVE • http://127.0.0.1:${PORT}/live.html`);
+    if (HOST === '0.0.0.0') {
+      for (const address of lanAddresses()) console.log(`ĐIỆN THOẠI • http://${address}:${PORT}/live.html`);
+      console.log('Điện thoại và máy tính cần cùng mạng Wi-Fi. Chỉ cho phép qua Windows Firewall trên mạng Riêng tư.');
+    }
     console.log(`NGÂN HÀNG • ${stats.total} từ, A1–C2`);
   });
 }
-module.exports = { server, state, stats, bank, withChoices, control, receiveComment, normalizeTikTokChat, estimateDeliveryLag, advance, answerKey, snapshot };
+module.exports = { server, state, stats, bank, withChoices, control, receiveComment, normalizeTikTokChat, estimateDeliveryLag, advance, answerKey, snapshot, isLoopback };

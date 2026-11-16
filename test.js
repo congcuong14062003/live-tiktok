@@ -1,7 +1,10 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { state, stats, bank, withChoices, control, receiveComment, normalizeTikTokChat, estimateDeliveryLag, advance, answerKey, snapshot } = require('./server');
+const { state, stats, bank, withChoices, control, receiveComment, normalizeTikTokChat, estimateDeliveryLag, advance, answerKey, snapshot, isLoopback } = require('./server');
+assert.equal(isLoopback('127.0.0.1'), true);
+assert.equal(isLoopback('::ffff:127.0.0.1'), true);
+assert.equal(isLoopback('192.168.1.10'), false);
 
 assert.equal(stats.total, 2000);
 assert.equal(stats.byLevel.C1, 25);
